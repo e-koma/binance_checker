@@ -9,6 +9,11 @@ class BinanceChecker
 
   def initialize
     @exchange_info = Binance::Api.exchange_info!
+    @purchased_coins = ENV['BINANCE_PURCHASED_COINS']&.split(',')
+  end
+
+  def purchased_tickers
+    @purchased_tickers ||= @purchased_coins.map { |coin| Binance::Api.ticker!(symbol: coin, type: 'daily') }
   end
 
   def all_tickers
@@ -24,4 +29,4 @@ class BinanceChecker
 end
 
 binance_checker = BinanceChecker.new
-puts binance_checker.all_tickers
+puts binance_checker.purchased_tickers
