@@ -8,7 +8,6 @@ class BinanceChecker
   Binance::Api::Configuration.secret_key = ENV['BINANCE_SECRET_KEY']
 
   def initialize
-    @exchange_info = Binance::Api.exchange_info!
     @purchased_coins = ENV['BINANCE_PURCHASED_COINS']&.split(',')
   end
 
@@ -19,6 +18,14 @@ class BinanceChecker
   def all_tickers
     raise 'Too many acquired symbols' if @exchange_info[:symbols].length > request_limit
     @all_tickers ||= Binance::Api.ticker!(symbol: nil, type: 'daily')
+  end
+
+  def purchased_exchange_info
+    @purchased_exchange_info ||= all_exchange_info[:symbols].select { |e_info| @purchased_coins.include?(e_info[:symbol]) }
+  end
+
+  def all_exchange_info
+    @all_exchange_info ||= Binance::Api.exchange_info!
   end
 
   private
