@@ -11,9 +11,9 @@ class BinanceChecker
     @exchange_info = Binance::Api.exchange_info!
   end
 
-  def current_ticker
+  def all_tickers
     raise 'Too many acquired symbols' if @exchange_info[:symbols].length > request_limit
-    @current_ticker ||= Binance::Api.ticker!(symbol: nil, type: 'daily')
+    @all_tickers ||= Binance::Api.ticker!(symbol: nil, type: 'daily')
   end
 
   private
@@ -24,4 +24,4 @@ class BinanceChecker
 end
 
 binance_checker = BinanceChecker.new
-puts binance_checker.current_ticker
+puts binance_checker.all_tickers
