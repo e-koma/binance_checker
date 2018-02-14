@@ -28,6 +28,15 @@ class BinanceChecker
     @all_exchange_info ||= Binance::Api.exchange_info!
   end
 
+  def export_base_price(tickers)
+    base_prices = tickers.map { |t| { "#{t[:symbol]}": "#{t[:openPrice]}" } }
+    File.open("base_prices", "w") { |f| f.puts Marshal.dump(base_prices) }
+  end
+
+  def import_base_price
+    Marshal.load(File.open("base_prices", "r"))
+  end
+
   private
 
   def request_limit
