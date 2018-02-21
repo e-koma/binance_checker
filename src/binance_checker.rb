@@ -37,6 +37,17 @@ class BinanceChecker
     Marshal.load(File.open("base_prices", "r"))
   end
 
+  def current_rate
+    base_prices = import_base_price
+    @purchased_coins.map do |coin|
+      base_price = base_prices.find { |b| b.has_key?(coin) }[coin].to_f
+      current_price = purchased_tickers.find { |t| t[:symbol] == coin }[:openPrice].to_f
+
+      rate = current_price / base_price
+      { "#{coin}" => "#{rate}" }
+    end
+  end
+
   private
 
   def request_limit
@@ -45,4 +56,4 @@ class BinanceChecker
 end
 
 binance_checker = BinanceChecker.new
-puts binance_checker.purchased_tickers
+puts binance_checker.current_rate
