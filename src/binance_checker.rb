@@ -29,7 +29,7 @@ class BinanceChecker
   end
 
   def export_base_price(tickers)
-    base_prices = tickers.map { |t| { "#{t[:symbol]}": "#{t[:openPrice]}" } }
+    base_prices = tickers.map { |t| { "#{t[:symbol]}" => "#{t[:openPrice]}" } }
     File.open("base_prices", "w") { |f| f.puts Marshal.dump(base_prices) }
   end
 
