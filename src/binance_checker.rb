@@ -29,12 +29,23 @@ class BinanceChecker
   end
 
   def export_base_price(tickers)
-    base_prices = tickers.map { |t| { "#{t[:symbol]}": "#{t[:openPrice]}" } }
+    base_prices = tickers.map { |t| { "#{t[:symbol]}" => "#{t[:openPrice]}" } }
     File.open("base_prices", "w") { |f| f.puts Marshal.dump(base_prices) }
   end
 
   def import_base_price
     Marshal.load(File.open("base_prices", "r"))
+  end
+
+  def current_rate
+    base_prices = import_base_price
+    @purchased_coins.map do |coin|
+      base_price = base_prices.find { |b| b.has_key?(coin) }[coin].to_f
+      current_price = purchased_tickers.find { |t| t[:symbol] == coin }[:openPrice].to_f
+
+      rate = current_price / base_price
+      { "#{coin}" => "#{rate}" }
+    end
   end
 
   private
@@ -45,4 +56,4 @@ class BinanceChecker
 end
 
 binance_checker = BinanceChecker.new
-puts binance_checker.purchased_tickers
+puts binance_checker.current_rate
