@@ -11,25 +11,8 @@ class BinanceChecker
     @purchased_coins = ENV['BINANCE_PURCHASED_COINS']&.split(',')
   end
 
-  def purchased_tickers
-    @purchased_tickers ||= @purchased_coins.map { |coin| Binance::Api.ticker!(symbol: coin, type: 'daily') }
-  end
-
-  def all_tickers
-    raise 'Too many acquired symbols' if @exchange_info[:symbols].length > request_limit
-    @all_tickers ||= Binance::Api.ticker!(symbol: nil, type: 'daily')
-  end
-
-  def purchased_exchange_info
-    @purchased_exchange_info ||= all_exchange_info[:symbols].select { |e_info| @purchased_coins.include?(e_info[:symbol]) }
-  end
-
-  def all_exchange_info
-    @all_exchange_info ||= Binance::Api.exchange_info!
-  end
-
-  def export_base_price(tickers)
-    base_prices = tickers.map { |t| { "#{t[:symbol]}" => "#{t[:openPrice]}" } }
+  def export_base_price
+    base_prices = purchased_tickers.map { |t| { "#{t[:symbol]}" => "#{t[:openPrice]}" } }
     File.open("base_prices", "w") { |f| f.puts Marshal.dump(base_prices) }
   end
 
@@ -49,6 +32,23 @@ class BinanceChecker
   end
 
   private
+
+  def purchased_tickers
+    @purchased_tickers ||= @purchased_coins.map { |coin| Binance::Api.ticker!(symbol: coin, type: 'daily') }
+  end
+
+  def all_tickers
+    raise 'Too many acquired symbols' if @exchange_info[:symbols].length > request_limit
+    @all_tickers ||= Binance::Api.ticker!(symbol: nil, type: 'daily')
+  end
+
+  def purchased_exchange_info
+    @purchased_exchange_info ||= all_exchange_info[:symbols].select { |e_info| @purchased_coins.include?(e_info[:symbol]) }
+  end
+
+  def all_exchange_info
+    @all_exchange_info ||= Binance::Api.exchange_info!
+  end
 
   def request_limit
     @exchange_info[:rateLimits].find { |limit| limit[:rateLimitType] == 'REQUESTS' }[:limit]
