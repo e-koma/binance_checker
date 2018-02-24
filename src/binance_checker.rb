@@ -9,6 +9,7 @@ class BinanceChecker
 
   def initialize
     @purchased_coins = ENV['BINANCE_PURCHASED_COINS']&.split(',')
+    validate
   end
 
   def export_base_price
@@ -17,7 +18,7 @@ class BinanceChecker
   end
 
   def import_base_price
-    Marshal.load(File.open("base_prices", "r"))
+    @import_base_price ||= Marshal.load(File.open("base_prices", "r"))
   end
 
   def current_rate
@@ -32,6 +33,17 @@ class BinanceChecker
   end
 
   private
+
+  def validate
+    if @purchased_coins.sort != exported_coins.sort
+      puts "The coin symbols (env and exported file) do not match. Please export again."
+      exit
+    end
+  end
+
+  def exported_coins
+    import_base_price.flat_map { |base_price| base_price.keys }
+  end
 
   def purchased_tickers
     @purchased_tickers ||= @purchased_coins.map { |coin| Binance::Api.ticker!(symbol: coin, type: 'daily') }
