@@ -13,22 +13,22 @@ class BinanceChecker
   end
 
   def export_base_price
-    base_prices = purchased_tickers.map { |t| { "#{t[:symbol]}" => "#{t[:openPrice]}" } }
-    File.open("base_prices", "w") { |f| f.puts Marshal.dump(base_prices) }
+    base_prices = purchased_tickers.map { |t| { (t[:symbol]).to_s => (t[:openPrice]).to_s } }
+    File.open('base_prices', 'w') { |f| f.puts Marshal.dump(base_prices) }
   end
 
   def import_base_price
-    @import_base_price ||= Marshal.load(File.open("base_prices", "r"))
+    @import_base_price ||= Marshal.load(File.open('base_prices', 'r'))
   end
 
   def current_rate
     base_prices = import_base_price
     @purchased_coins.map do |coin|
-      base_price = base_prices.find { |b| b.has_key?(coin) }[coin].to_f
+      base_price = base_prices.find { |b| b.key?(coin) }[coin].to_f
       current_price = purchased_tickers.find { |t| t[:symbol] == coin }[:openPrice].to_f
 
       rate = current_price / base_price
-      { "#{coin}" => "#{rate}" }
+      { coin.to_s => rate.to_s }
     end
   end
 
@@ -36,13 +36,13 @@ class BinanceChecker
 
   def validate
     if @purchased_coins.sort != exported_coins.sort
-      puts "The coin symbols (env and exported file) do not match. Please export again."
+      puts 'The coin symbols (env and exported file) do not match. Please export again.'
       exit
     end
   end
 
   def exported_coins
-    import_base_price.flat_map { |base_price| base_price.keys }
+    import_base_price.flat_map(&:keys)
   end
 
   def purchased_tickers
