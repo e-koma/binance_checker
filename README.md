@@ -1,1 +1,1 @@
-# crypto_currency_trading
+# binance_checker
